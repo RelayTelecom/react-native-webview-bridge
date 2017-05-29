@@ -31,4 +31,5 @@ repositories {
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
+    compile(group: 'status-im', name: 'status-go', version: 'expose-in-proc-rpc-server-gc1dce43', ext: 'aar')
 }
