@@ -119,20 +119,23 @@ RCT_NOT_IMPLEMENTED(- (instancetype)initWithCoder:(NSCoder *)aDecoder)
 
 - (void)sendIt:(NSString *)body
 {
-    NSData *data = [body dataUsingEncoding:NSUTF8StringEncoding];
-    NSDictionary *responseDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-    NSString *callbackId = [responseDic objectForKey:@"callbackId"];
-    NSString *host = [responseDic objectForKey:@"host"];
-    NSString *payload = [responseDic objectForKey:@"payload"];
+    dispatch_async( dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData *data = [body dataUsingEncoding:NSUTF8StringEncoding];
+        NSDictionary *responseDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+        NSString *callbackId = [responseDic objectForKey:@"callbackId"];
+        NSString *host = [responseDic objectForKey:@"host"];
+        NSString *payload = [responseDic objectForKey:@"payload"];
 
-    char *result = CallRPC((char *) [payload UTF8String]);
-    NSString *response = [NSString stringWithUTF8String: result];
-    NSString *trimmedResponse = [response stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        char *result = CallRPC((char *) [payload UTF8String]);
+        NSString *response = [NSString stringWithUTF8String: result];
+        NSString *trimmedResponse = [response stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
-    NSString *format = @"httpCallback('%@', '%@');";
+        NSString *format = @"httpCallback('%@', '%@');";
 
-    NSString *command = [NSString stringWithFormat: format, callbackId, trimmedResponse];
-    [_webView evaluateJavaScript:command completionHandler:nil];
+        NSString *command = [NSString stringWithFormat: format, callbackId, trimmedResponse];
+        [_webView evaluateJavaScript:command completionHandler:nil];
+
+    });
 }
 
 - (void)sendToBridge:(NSString *)message
