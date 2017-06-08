@@ -112,6 +112,11 @@ public class WebViewBridgeManager extends ReactWebViewManager {
                 callback.invoke(origin, true, false);
             }
         }
+        
+        @Override
+        public void onPermissionRequest(final PermissionRequest request) {
+            request.grant(request.getResources());
+        }
     }
 
     static String userAgent = "";
